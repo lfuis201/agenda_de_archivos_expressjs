@@ -38,11 +38,14 @@
 
         <button type="submit" id="guardarBoton">Guardar</button>
 
+        <button type="button" id="borrarBoton">Borrar</button>
+
     </form>
 
 
 <!-- Textarea para mostrar el contenido del archivo -->
     <textarea id="contenidoArchivo" rows="10" cols="50"></textarea>
+
 
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -115,7 +118,28 @@
                     alert('Error al guardar el archivo.');
                 });
             });
+
+            // Manejar el clic en el botón de borrar
+            $('#borrarBoton').click(function () {
+                const carpetaSeleccionada = $('#carpeta').val();
+                const archivoSeleccionado = $('#contenido').val();
+
+                // Hacer una solicitud POST al servidor para borrar el archivo
+                $.post('http://localhost:3000/borrarArchivo', {
+                    carpeta: carpetaSeleccionada,
+                    archivo: archivoSeleccionado
+                }, function (response) {
+                    alert(response); // Muestra un mensaje de éxito o error
+                    // Actualiza la lista de archivos después de borrar
+                    cargarArchivosDeCarpeta(carpetaSeleccionada);
+                }).fail(function () {
+                    alert('Error al borrar el archivo.');
+                });
+            });
+
         });
+
+        
     </script>
 </body>
 </html>

@@ -124,6 +124,37 @@ app.post('/guardarArchivo', (req, res) => {
   });
 });
 
+// Ruta para borrar un archivo de una carpeta seleccionada
+app.post('/borrarArchivo', (req, res) => {
+  const carpetaSeleccionada = req.body.carpeta;
+  const archivoSeleccionado = req.body.archivo;
+  
+  const directorioEventos = path.join(__dirname, 'public', 'directorio-de-eventos');
+
+
+  // Componer la ruta completa al archivo dentro de la carpeta seleccionada
+  const rutaArchivo = path.join(__dirname, 'public', 'directorio-de-eventos', carpetaSeleccionada, archivoSeleccionado);
+
+  // Verificar si el archivo existe antes de intentar borrarlo
+  fs.access(rutaArchivo, fs.constants.F_OK, (err) => {
+    if (err) {
+      console.error('El archivo no existe:', err);
+      return res.status(404).send('El archivo no existe');
+    }
+
+    // Borrar el archivo
+    fs.unlink(rutaArchivo, (err) => {
+      if (err) {
+        console.error('Error al borrar el archivo:', err);
+        return res.status(500).send('Error interno del servidor al borrar el archivo');
+      }
+
+      console.log('Archivo borrado:', rutaArchivo);
+      res.status(200).send('Archivo borrado correctamente');
+    });
+  });
+});
+
 
 app.listen(port, () => {
   console.log(`El servidor está escuchando en el puerto ${port}`);

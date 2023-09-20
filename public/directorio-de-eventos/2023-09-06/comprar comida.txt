@@ -1,4 +1,0 @@
-Título: comprar comida
-Descripción: comprar -huevo
-.tomate
-lechuga editado

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crear Evento</title>
+</head>
+<body>
+    <h1>Crear Evento</h1>
+
+    <form id="eventoForm" action="http://localhost:3000/crearEvento" method="POST">
+        <label for="titulo">Título:</label>
+        <input type="text" id="titulo" name="titulo" placeholder="Título del evento" required><br>
+
+        <label for="descripcion">Descripción:</label><br>
+        <textarea id="descripcion" name="descripcion" rows="4" cols="50" placeholder="Descripción del evento" required></textarea><br>
+
+        <label for="fecha">Fecha:</label>
+        <input type="date" id="fecha" name="fecha" required><br>
+
+        <input type="submit" value="Crear Evento">
+    </form>
+
+
+
+    <!-- Formulario para seleccionar una carpeta -->
+    <form id="editarForm">
+        <label for="carpeta">Selecciona una carpeta:</label>
+        <select id="carpeta" name="carpeta">
+            <!-- Opciones se generarán dinámicamente aquí -->
+        </select>
+
+        <!-- Segundo select para mostrar el contenido de la carpeta seleccionada -->
+        <label for="contenido">Contenido de la carpeta:</label>
+        <select id="contenido" name="contenido">
+            <!-- Opciones se generarán dinámicamente aquí -->
+        </select>
+
+        <button type="submit">Editar</button>
+
+        <button type="submit" id="guardarBoton">Guardar</button>
+
+    </form>
+
+
+<!-- Textarea para mostrar el contenido del archivo -->
+    <textarea id="contenidoArchivo" rows="10" cols="50"></textarea>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Cuando se cambia la carpeta seleccionada
+            $('#carpeta').change(function () {
+                const carpetaSeleccionada = $(this).val();
+                
+                // Hacer una solicitud GET para obtener el contenido de la carpeta seleccionada
+                $.get(`http://localhost:3000/contenidoCarpeta?carpeta=${carpetaSeleccionada}`, function (data) {
+                    const selectContenido = $('#contenido');
+                    selectContenido.empty(); // Limpia las opciones anteriores
+    
+                    // Genera las opciones del segundo select en base al contenido de la carpeta
+                    data.contenido.forEach(function (item) {
+                        selectContenido.append($('<option>', {
+                            value: item,
+                            text: item
+                        }));
+                    });
+                });
+
+                // Hacer una solicitud GET para obtener el contenido del archivo seleccionado
+                $.get(`http://localhost:3000/contenidoArchivo?carpeta=${carpetaSeleccionada}&archivo=${archivoSeleccionado}`, function (data) {
+                    $('#contenidoArchivo').val(data.contenido);
+                });
+            });
+    
+            // Cuando se envía el formulario
+            $('#editarForm').submit(function (event) {
+                event.preventDefault(); // Evita que el formulario se envíe
+    
+                const carpetaSeleccionada = $('#carpeta').val();
+                const archivoSeleccionado = $('#contenido').val();
+    
+                // Hacer una solicitud GET para obtener el contenido del archivo seleccionado
+                $.get(`http://localhost:3000/contenidoArchivo?carpeta=${carpetaSeleccionada}&archivo=${archivoSeleccionado}`, function (data) {
+                    $('#contenidoArchivo').val(data.contenido);
+                });
+            });
+    
+            // Cargar las carpetas disponibles
+            $.get('http://localhost:3000/carpetasDisponibles', function (data) {
+                const selectCarpeta = $('#carpeta');
+                // Genera las opciones del primer select en base a las carpetas disponibles
+                data.carpetas.forEach(function (carpeta) {
+                    selectCarpeta.append($('<option>', {
+                        value: carpeta,
+                        text: carpeta
+                    }));
+                });
+            });
+
+            $('#guardarBoton').click(function () {
+                const carpetaSeleccionada = $('#carpeta').val();
+                const archivoSeleccionado = $('#contenido').val();
+                const nuevoContenido = $('#contenidoArchivo').val();
+
+                // Utiliza $.post para enviar los datos al servidor con el método POST
+                $.post('http://localhost:3000/guardarArchivo', {
+                    carpeta: carpetaSeleccionada,
+                    archivo: archivoSeleccionado,
+                    contenido: nuevoContenido
+                }, function (response) {
+                    alert(response); // Muestra un mensaje de éxito o error
+                    // Actualiza la lista de archivos después de guardar
+                    cargarArchivosDeCarpeta(carpetaSeleccionada);
+                }).fail(function () {
+                    alert('Error al guardar el archivo.');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
